@@ -18,6 +18,7 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedGenresRouteImport } from './routes/_authenticated/genres'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPromotionsRouteImport } from './routes/_authenticated/promotions'
 import { Route as AuthenticatedSeriesRouteImport } from './routes/_authenticated/series'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -71,6 +72,11 @@ const AuthenticatedGenresRoute = AuthenticatedGenresRouteImport.update({
 const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   id: '/moderation',
   path: '/moderation',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPromotionsRoute = AuthenticatedPromotionsRouteImport.update({
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/promotions': typeof AuthenticatedPromotionsRoute
   '/series': typeof AuthenticatedSeriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/promotions': typeof AuthenticatedPromotionsRoute
   '/series': typeof AuthenticatedSeriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/genres': typeof AuthenticatedGenresRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/promotions': typeof AuthenticatedPromotionsRoute
   '/_authenticated/series': typeof AuthenticatedSeriesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -199,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/genres'
     | '/moderation'
+    | '/orders'
     | '/promotions'
     | '/series'
     | '/settings'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/genres'
     | '/moderation'
+    | '/orders'
     | '/promotions'
     | '/series'
     | '/settings'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/genres'
     | '/_authenticated/moderation'
+    | '/_authenticated/orders'
     | '/_authenticated/promotions'
     | '/_authenticated/series'
     | '/_authenticated/settings'
@@ -324,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedModerationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/promotions': {
       id: '/_authenticated/promotions'
       path: '/promotions'
@@ -404,6 +423,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGenresRoute: typeof AuthenticatedGenresRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPromotionsRoute: typeof AuthenticatedPromotionsRoute
   AuthenticatedSeriesRoute: typeof AuthenticatedSeriesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -422,6 +442,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGenresRoute: AuthenticatedGenresRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPromotionsRoute: AuthenticatedPromotionsRoute,
   AuthenticatedSeriesRoute: AuthenticatedSeriesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
