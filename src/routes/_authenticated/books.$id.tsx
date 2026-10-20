@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ImagePlus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -20,6 +20,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 type Book = Database["public"]["Tables"]["books"]["Row"];
 const BOOK_STATUSES = ["draft", "in_review", "scheduled", "published", "unpublished", "archived"] as const;
 const ACCESS = ["free", "paid", "subscription", "per_chapter"] as const;
+const COVER_BUCKET = "book-covers";
+const COVER_MAX_MB = 5;
 
 export const Route = createFileRoute("/_authenticated/books/$id")({
   head: () => ({ meta: [{ title: "Edit book — Hawwii Admin" }, { name: "description", content: "Edit book details and chapters." }, { property: "og:title", content: "Edit book — Hawwii Admin" }, { property: "og:description", content: "Edit book details and chapters." }] }),
@@ -47,10 +49,31 @@ function BookPage() {
     },
   });
   const [form, setForm] = useState<Book | null>(null);
+  const [busy, setBusy] = useState(false);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverRemoved, setCoverRemoved] = useState(false);
+  const [coverObjectUrl, setCoverObjectUrl] = useState<string | null>(null);
+  const [coverSignedUrl, setCoverSignedUrl] = useState<string | null>(null);
   useEffect(() => { if (data?.book) setForm(data.book); }, [data?.book]);
 
+  // Cover preview: freshly picked file, or a signed link for the stored image.
+  useEffect(() => {
+    if (!coverFile) { setCoverObjectUrl(null); return undefined; }
+    const u = URL.createObjectURL(coverFile);
+    setCoverObjectUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [coverFile]);
+  useEffect(() => {
+    const path = form?.cover_path;
+    if (!path) { setCoverSignedUrl(null); return undefined; }
+    let alive = true;
+    supabase.storage.from(COVER_BUCKET).createSignedUrl(path, 3600).then(({ data: s }) => { if (alive) setCoverSignedUrl(s?.signedUrl ?? null); });
+    return () => { alive = false; };
+  }, [form?.cover_path]);
+
   if (isLoading || !form) return <p className="text-muted-foreground">{isLoading ? "Loading…" : "Book not found."}</p>;
-  const set = <K extends keyof Book>(k: K, v: Book[K]) => setForm({ ...form, [k]: v });
+  const coverPreview = coverFile ? coverObjectUrl : coverRemoved ? null : form.cover_path ? coverSignedUrl : form.cover_url || null;
 
   async function save() {
     if (!form) return;
