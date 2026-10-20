@@ -1,0 +1,12 @@
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.is_admin(uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.is_staff(uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.can_edit_content(uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_role(uuid, public.app_role), public.is_admin(uuid), public.is_staff(uuid), public.can_edit_content(uuid) TO authenticated;
+DROP POLICY "Public reads published books" ON public.books;
+CREATE POLICY "Anon reads published books" ON public.books FOR SELECT TO anon USING (status = 'published');
+CREATE POLICY "Auth reads books" ON public.books FOR SELECT TO authenticated USING (status = 'published' OR public.is_staff(auth.uid()));
+DROP POLICY "Public reads published chapters" ON public.chapters;
+CREATE POLICY "Anon reads published chapters" ON public.chapters FOR SELECT TO anon USING (status = 'published' AND EXISTS (SELECT 1 FROM public.books b WHERE b.id = book_id AND b.status = 'published'));
+CREATE POLICY "Auth reads chapters" ON public.chapters FOR SELECT TO authenticated USING (public.is_staff(auth.uid()) OR (status = 'published' AND EXISTS (SELECT 1 FROM public.books b WHERE b.id = book_id AND b.status = 'published')));
