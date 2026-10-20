@@ -1,7 +1,7 @@
-import { Link, Outlet, useNavigate } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog, Receipt } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog, Receipt, ChevronDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
