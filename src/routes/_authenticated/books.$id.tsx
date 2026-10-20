@@ -73,6 +73,7 @@ function BookPage() {
   }, [form?.cover_path]);
 
   if (isLoading || !form) return <p className="text-muted-foreground">{isLoading ? "Loading…" : "Book not found."}</p>;
+  const set = <K extends keyof Book>(k: K, v: Book[K]) => setForm({ ...form, [k]: v });
   const coverPreview = coverFile ? coverObjectUrl : coverRemoved ? null : form.cover_path ? coverSignedUrl : form.cover_url || null;
 
   async function save() {
