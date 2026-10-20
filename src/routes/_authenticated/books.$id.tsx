@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { PageHeader, StatusBadge } from "@/components/admin-shell";
-import { canEdit, isAdmin, logAction, myRolesQuery } from "@/lib/admin";
+import { BookRights } from "@/components/book-rights";
+import { canEdit, effectiveStatus, isAdmin, logAction, myRolesQuery, toLocalInput } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -128,7 +129,7 @@ function BookPage() {
                 </Select>
               </Field>
               {form.status === "scheduled" && (
-                <Field label="Publish at"><Input type="datetime-local" disabled={!editable} value={form.scheduled_at?.slice(0, 16) ?? ""} onChange={(e) => set("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)} /></Field>
+                <Field label="Publish at"><Input type="datetime-local" disabled={!editable} value={toLocalInput(form.scheduled_at)} onChange={(e) => set("scheduled_at", e.target.value ? new Date(e.target.value).toISOString() : null)} /></Field>
               )}
               <Field label="Access">
                 <Select disabled={!editable} value={form.access_type} onValueChange={(v) => set("access_type", v as Book["access_type"])}>
@@ -156,6 +157,7 @@ function BookPage() {
         </div>
       </div>
 
+      <BookRights bookId={id} editable={editable} />
       <Card className="mt-6">
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle className="text-base">Chapters</CardTitle>
@@ -170,7 +172,7 @@ function BookPage() {
                 <Link to="/books/$id/chapters/$chapterId" params={{ id, chapterId: c.id }} className="flex-1 text-sm font-medium hover:text-primary">{c.title}{c.content_type === "pdf" && <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs text-accent-foreground">PDF</span>}</Link>
                 <span className="text-xs text-muted-foreground">{c.word_count} words</span>
                 <span className="text-xs">{c.is_free ? "Free" : "Premium"}</span>
-                <StatusBadge status={c.status} />
+                <StatusBadge status={effectiveStatus(c.status, c.scheduled_at)} />
               </li>
             ))}
           </ul>

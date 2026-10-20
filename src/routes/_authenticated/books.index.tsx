@@ -5,7 +5,7 @@ import { Plus, Search } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin-shell";
-import { canEdit, formatPrice, logAction, myRolesQuery, slugify } from "@/lib/admin";
+import { canEdit, effectiveStatus, formatPrice, logAction, myRolesQuery, slugify } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -28,7 +28,7 @@ function BooksPage() {
   const { data: books, isLoading } = useQuery({
     queryKey: ["books", q, status],
     queryFn: async () => {
-      let query = supabase.from("books").select("id,title,status,access_type,price_cents,currency,updated_at,genres(name),chapters(count)").order("updated_at", { ascending: false });
+      let query = supabase.from("books").select("id,title,status,scheduled_at,access_type,price_cents,currency,updated_at,genres(name),chapters(count)").order("updated_at", { ascending: false });
       if (q) query = query.ilike("title", `%${q}%`);
       if (status !== "all") query = query.eq("status", status as (typeof STATUSES)[number]);
       const { data, error } = await query;
@@ -65,7 +65,7 @@ function BooksPage() {
               <TableRow key={b.id}>
                 <TableCell><Link to="/books/$id" params={{ id: b.id }} className="font-medium hover:text-primary">{b.title}</Link></TableCell>
                 <TableCell className="text-muted-foreground">{b.genres?.name ?? "—"}</TableCell>
-                <TableCell><StatusBadge status={b.status} /></TableCell>
+                <TableCell><StatusBadge status={effectiveStatus(b.status, b.scheduled_at)} /></TableCell>
                 <TableCell className="text-sm">{b.access_type === "paid" ? formatPrice(b.price_cents, b.currency) : b.access_type.replace("_", " ")}</TableCell>
                 <TableCell className="text-right">{b.chapters?.[0]?.count ?? 0}</TableCell>
               </TableRow>

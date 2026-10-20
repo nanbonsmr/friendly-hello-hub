@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { PageHeader } from "@/components/admin-shell";
-import { canEdit, countWords, logAction, myRolesQuery } from "@/lib/admin";
+import { canEdit, countWords, logAction, myRolesQuery, toLocalInput } from "@/lib/admin";
+import { ChapterRevisions } from "@/components/chapter-revisions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,6 +86,7 @@ function ChapterPage() {
 
   async function save() {
     if (!c?.title) { toast.error("Add a chapter title."); return; }
+    if (c.status === "scheduled" && !c.scheduled_at) { toast.error("Pick a publish date and time."); return; }
     if (isPdf && !file && !c.pdf_path) { toast.error("Upload a PDF for this chapter."); return; }
     setBusy(true);
     try {
@@ -105,6 +107,7 @@ function ChapterPage() {
         word_count: isPdf ? 0 : countWords(c.content ?? ""),
         pdf_path, pdf_name,
         is_free: !!c.is_free, price_cents: c.price_cents ?? 0,
+        scheduled_at: c.status === "scheduled" ? c.scheduled_at ?? null : null,
         published_at: c.status === "published" && !c.published_at ? new Date().toISOString() : c.published_at ?? null,
       };
       const res = isNew
@@ -204,6 +207,9 @@ function ChapterPage() {
                   <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
                 </Select>
               </Field>
+              {c.status === "scheduled" && (
+                <Field label="Publish at"><Input type="datetime-local" disabled={!editable} value={toLocalInput(c.scheduled_at)} onChange={(e) => setC({ ...c, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : null })} /></Field>
+              )}
             </CardContent>
           </Card>
           <Card>
@@ -215,6 +221,7 @@ function ChapterPage() {
               )}
             </CardContent>
           </Card>
+          {!isNew && <ChapterRevisions chapterId={chapterId} bookId={bookId} editable={editable} />}
         </div>
       </div>
     </>
