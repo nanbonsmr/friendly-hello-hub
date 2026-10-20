@@ -47,9 +47,16 @@ const groups = [
 
 export function AdminShell() {
   const [open, setOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const qc = useQueryClient();
   const navigate = useNavigate();
   const { data: roles = [] } = useQuery(myRolesQuery);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const activeGroup = groups.find((g) => g.items.some((i) => pathname === i.to || pathname.startsWith(`${i.to}/`)))?.label;
+  useEffect(() => {
+    if (activeGroup) setOpenGroups((prev) => (prev[activeGroup] ? prev : { ...prev, [activeGroup]: true }));
+  }, [activeGroup]);
 
   async function signOut() {
     await qc.cancelQueries();
@@ -59,28 +66,45 @@ export function AdminShell() {
   }
 
   const nav = (
-    <nav className="flex h-full flex-col gap-5 overflow-y-auto p-4">
-      <div className="flex items-center gap-2 px-2 py-1">
+    <nav className="flex h-full flex-col gap-1 overflow-y-auto p-4">
+      <div className="mb-3 flex items-center gap-2 px-2 py-1">
         <BookOpen className="h-5 w-5 text-sidebar-primary" />
         <span className="font-semibold text-sidebar-accent-foreground">Hawwii Admin</span>
       </div>
-      {groups.map((g) => (
-        <div key={g.label}>
-          <p className="mb-1 px-2 text-xs uppercase tracking-wider opacity-60">{g.label}</p>
-          {g.items.map((i) => (
-            <Link
-              key={i.to}
-              to={i.to}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent"
-              activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground" }}
+      {groups.map((g) => {
+        const isOpen = openGroups[g.label] ?? false;
+        return (
+          <div key={g.label}>
+            <button
+              onClick={() => setOpenGroups((prev) => ({ ...prev, [g.label]: !isOpen }))}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium hover:bg-sidebar-accent",
+                activeGroup === g.label && "text-sidebar-accent-foreground",
+              )}
+              aria-expanded={isOpen}
             >
-              <i.icon className="h-4 w-4" /> {i.label}
-            </Link>
-          ))}
-        </div>
-      ))}
-      <div className="mt-auto space-y-2">
+              <span className="flex-1 text-left uppercase tracking-wider text-xs opacity-70">{g.label}</span>
+              <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
+            </button>
+            {isOpen && (
+              <div className="mt-1 space-y-0.5 pl-2">
+                {g.items.map((i) => (
+                  <Link
+                    key={i.to}
+                    to={i.to}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-3 rounded-lg px-2 py-2 text-sm hover:bg-sidebar-accent"
+                    activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground" }}
+                  >
+                    <i.icon className="h-4 w-4" /> {i.label}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <div className="mt-auto space-y-2 pt-4">
         <div className="flex flex-wrap gap-1 px-2">
           {roles.length ? roles.map((r) => <Badge key={r} variant="secondary">{r.replace("_", " ")}</Badge>) : <span className="text-xs opacity-60">No staff role</span>}
         </div>
