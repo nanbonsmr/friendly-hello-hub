@@ -381,6 +381,65 @@ export type Database = {
           },
         ]
       }
+      entitlements: {
+        Row: {
+          book_id: string | null
+          chapter_id: string | null
+          created_at: string
+          id: string
+          order_id: string | null
+          revoked_at: string | null
+          user_id: string
+        }
+        Insert: {
+          book_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          revoked_at?: string | null
+          user_id: string
+        }
+        Update: {
+          book_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          revoked_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       genres: {
         Row: {
           created_at: string
@@ -408,6 +467,97 @@ export type Database = {
         }
         Relationships: []
       }
+      orders: {
+        Row: {
+          amount_cents: number
+          book_id: string | null
+          chapter_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          item_title: string
+          paid_cents: number | null
+          payer_name: string | null
+          provider: string | null
+          receipt_reference: string | null
+          receipt_source: string | null
+          receiver_name: string | null
+          refund_reason: string | null
+          refunded_at: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+        }
+        Insert: {
+          amount_cents: number
+          book_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          item_title: string
+          paid_cents?: number | null
+          payer_name?: string | null
+          provider?: string | null
+          receipt_reference?: string | null
+          receipt_source?: string | null
+          receiver_name?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          book_id?: string | null
+          chapter_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          item_title?: string
+          paid_cents?: number | null
+          payer_name?: string | null
+          provider?: string | null
+          receipt_reference?: string | null
+          receipt_source?: string | null
+          receiver_name?: string | null
+          refund_reason?: string | null
+          refunded_at?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       platform_settings: {
         Row: {
           default_chapter_price_cents: number
@@ -415,6 +565,8 @@ export type Database = {
           free_preview_chapters: number
           id: number
           maintenance_mode: boolean
+          payment_instructions: string | null
+          payment_receiver_names: string | null
           platform_name: string
           require_review_approval: boolean
           reviews_enabled: boolean
@@ -427,6 +579,8 @@ export type Database = {
           free_preview_chapters?: number
           id?: number
           maintenance_mode?: boolean
+          payment_instructions?: string | null
+          payment_receiver_names?: string | null
           platform_name?: string
           require_review_approval?: boolean
           reviews_enabled?: boolean
@@ -439,6 +593,8 @@ export type Database = {
           free_preview_chapters?: number
           id?: number
           maintenance_mode?: boolean
+          payment_instructions?: string | null
+          payment_receiver_names?: string | null
           platform_name?: string
           require_review_approval?: boolean
           reviews_enabled?: boolean
