@@ -1,0 +1,5 @@
+ALTER TABLE public.chapters ADD COLUMN content_type text NOT NULL DEFAULT 'text', ADD COLUMN pdf_path text, ADD COLUMN pdf_name text;
+CREATE POLICY "Staff read chapter files" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'chapter-files' AND public.is_staff(auth.uid()));
+CREATE POLICY "Editors upload chapter files" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'chapter-files' AND public.can_edit_content(auth.uid()));
+CREATE POLICY "Editors update chapter files" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'chapter-files' AND public.can_edit_content(auth.uid()));
+CREATE POLICY "Editors delete chapter files" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'chapter-files' AND public.can_edit_content(auth.uid()));
