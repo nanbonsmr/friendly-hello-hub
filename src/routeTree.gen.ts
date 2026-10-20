@@ -18,6 +18,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedGenresRouteImport } from './routes/_authenticated/genres'
 import { Route as AuthenticatedBooksIndexRouteImport } from './routes/_authenticated/books.index'
 import { Route as AuthenticatedBooksIdRouteImport } from './routes/_authenticated/books.$id'
+import { Route as AuthenticatedBooksIdChaptersChapterIdRouteImport } from './routes/_authenticated/books.$id_.chapters.$chapterId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -63,6 +64,12 @@ const AuthenticatedBooksIdRoute = AuthenticatedBooksIdRouteImport.update({
   path: '/books/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBooksIdChaptersChapterIdRoute =
+  AuthenticatedBooksIdChaptersChapterIdRouteImport.update({
+    id: '/books/$id_/chapters/$chapterId',
+    path: '/books/$id/chapters/$chapterId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/genres': typeof AuthenticatedGenresRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books/': typeof AuthenticatedBooksIndexRoute
+  '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/genres': typeof AuthenticatedGenresRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books': typeof AuthenticatedBooksIndexRoute
+  '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/genres': typeof AuthenticatedGenresRoute
   '/_authenticated/books/$id': typeof AuthenticatedBooksIdRoute
   '/_authenticated/books/': typeof AuthenticatedBooksIndexRoute
+  '/_authenticated/books/$id_/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/genres'
     | '/books/$id'
     | '/books/'
+    | '/books/$id/chapters/$chapterId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/genres'
     | '/books/$id'
     | '/books'
+    | '/books/$id/chapters/$chapterId'
   id:
     | '__root__'
     | '/'
@@ -128,6 +140,7 @@ export interface FileRouteTypes {
     | '/_authenticated/genres'
     | '/_authenticated/books/$id'
     | '/_authenticated/books/'
+    | '/_authenticated/books/$id_/chapters/$chapterId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBooksIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/books/$id_/chapters/$chapterId': {
+      id: '/_authenticated/books/$id_/chapters/$chapterId'
+      path: '/books/$id/chapters/$chapterId'
+      fullPath: '/books/$id/chapters/$chapterId'
+      preLoaderRoute: typeof AuthenticatedBooksIdChaptersChapterIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -211,6 +231,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedGenresRoute: typeof AuthenticatedGenresRoute
   AuthenticatedBooksIdRoute: typeof AuthenticatedBooksIdRoute
   AuthenticatedBooksIndexRoute: typeof AuthenticatedBooksIndexRoute
+  AuthenticatedBooksIdChaptersChapterIdRoute: typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -220,6 +241,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGenresRoute: AuthenticatedGenresRoute,
   AuthenticatedBooksIdRoute: AuthenticatedBooksIdRoute,
   AuthenticatedBooksIndexRoute: AuthenticatedBooksIndexRoute,
+  AuthenticatedBooksIdChaptersChapterIdRoute:
+    AuthenticatedBooksIdChaptersChapterIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
