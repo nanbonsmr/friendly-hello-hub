@@ -107,6 +107,53 @@ export type Database = {
           },
         ]
       }
+      book_rights: {
+        Row: {
+          book_id: string
+          created_at: string
+          ends_on: string | null
+          id: string
+          license_type: string
+          notes: string | null
+          rights_holder: string
+          starts_on: string | null
+          territory: string
+          updated_at: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          license_type?: string
+          notes?: string | null
+          rights_holder: string
+          starts_on?: string | null
+          territory?: string
+          updated_at?: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          license_type?: string
+          notes?: string | null
+          rights_holder?: string
+          starts_on?: string | null
+          territory?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_rights_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           access_type: Database["public"]["Enums"]["access_type"]
@@ -178,6 +225,53 @@ export type Database = {
           },
         ]
       }
+      chapter_revisions: {
+        Row: {
+          chapter_id: string
+          content: string
+          content_type: string
+          created_at: string
+          edited_by: string | null
+          id: string
+          pdf_name: string | null
+          pdf_path: string | null
+          title: string
+          word_count: number
+        }
+        Insert: {
+          chapter_id: string
+          content: string
+          content_type: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          pdf_name?: string | null
+          pdf_path?: string | null
+          title: string
+          word_count?: number
+        }
+        Update: {
+          chapter_id?: string
+          content?: string
+          content_type?: string
+          created_at?: string
+          edited_by?: string | null
+          id?: string
+          pdf_name?: string | null
+          pdf_path?: string | null
+          title?: string
+          word_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chapter_revisions_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chapters: {
         Row: {
           book_id: string
@@ -191,6 +285,7 @@ export type Database = {
           pdf_path: string | null
           price_cents: number
           published_at: string | null
+          scheduled_at: string | null
           status: Database["public"]["Enums"]["chapter_status"]
           title: string
           updated_at: string
@@ -208,6 +303,7 @@ export type Database = {
           pdf_path?: string | null
           price_cents?: number
           published_at?: string | null
+          scheduled_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]
           title: string
           updated_at?: string
@@ -225,6 +321,7 @@ export type Database = {
           pdf_path?: string | null
           price_cents?: number
           published_at?: string | null
+          scheduled_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]
           title?: string
           updated_at?: string
@@ -236,6 +333,50 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          resolution_note: string | null
+          status: string
+          target_id: string
+          target_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          resolution_note?: string | null
+          status?: string
+          target_id: string
+          target_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          resolution_note?: string | null
+          status?: string
+          target_id?: string
+          target_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -263,6 +404,45 @@ export type Database = {
           id?: string
           name?: string
           slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          default_chapter_price_cents: number
+          default_currency: string
+          free_preview_chapters: number
+          id: number
+          maintenance_mode: boolean
+          platform_name: string
+          require_review_approval: boolean
+          reviews_enabled: boolean
+          support_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          default_chapter_price_cents?: number
+          default_currency?: string
+          free_preview_chapters?: number
+          id?: number
+          maintenance_mode?: boolean
+          platform_name?: string
+          require_review_approval?: boolean
+          reviews_enabled?: boolean
+          support_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          default_chapter_price_cents?: number
+          default_currency?: string
+          free_preview_chapters?: number
+          id?: number
+          maintenance_mode?: boolean
+          platform_name?: string
+          require_review_approval?: boolean
+          reviews_enabled?: boolean
+          support_email?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -297,6 +477,323 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          discount_type: string
+          discount_value: number
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          max_uses: number | null
+          starts_at: string | null
+          updated_at: string
+          uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          discount_type?: string
+          discount_value?: number
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          max_uses?: number | null
+          starts_at?: string | null
+          updated_at?: string
+          uses?: number
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          body: string | null
+          book_id: string
+          created_at: string
+          id: string
+          rating: number
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          book_id: string
+          created_at?: string
+          id?: string
+          rating: number
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          book_id?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      series: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      series_books: {
+        Row: {
+          book_id: string
+          position: number
+          series_id: string
+        }
+        Insert: {
+          book_id: string
+          position?: number
+          series_id: string
+        }
+        Update: {
+          book_id?: string
+          position?: number
+          series_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "series_books_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "series_books_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          interval: string
+          is_active: boolean
+          name: string
+          price_cents: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name: string
+          price_cents?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          interval?: string
+          is_active?: boolean
+          name?: string
+          price_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string
+          id: string
+          plan_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string
+          id?: string
+          plan_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_messages: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          is_staff: boolean
+          ticket_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_messages_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_tickets: {
+        Row: {
+          created_at: string
+          id: string
+          priority: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          priority?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -324,6 +821,8 @@ export type Database = {
     }
     Functions: {
       can_edit_content: { Args: { _user_id: string }; Returns: boolean }
+      can_manage_finance: { Args: { _user_id: string }; Returns: boolean }
+      can_moderate: { Args: { _user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -332,6 +831,10 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_live: {
+        Args: { _scheduled_at: string; _status: string }
+        Returns: boolean
+      }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
