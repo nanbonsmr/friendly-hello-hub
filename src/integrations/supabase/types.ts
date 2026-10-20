@@ -182,10 +182,13 @@ export type Database = {
         Row: {
           book_id: string
           content: string
+          content_type: string
           created_at: string
           id: string
           is_free: boolean
           number: number
+          pdf_name: string | null
+          pdf_path: string | null
           price_cents: number
           published_at: string | null
           status: Database["public"]["Enums"]["chapter_status"]
@@ -196,10 +199,13 @@ export type Database = {
         Insert: {
           book_id: string
           content?: string
+          content_type?: string
           created_at?: string
           id?: string
           is_free?: boolean
           number: number
+          pdf_name?: string | null
+          pdf_path?: string | null
           price_cents?: number
           published_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]
@@ -210,10 +216,13 @@ export type Database = {
         Update: {
           book_id?: string
           content?: string
+          content_type?: string
           created_at?: string
           id?: string
           is_free?: boolean
           number?: number
+          pdf_name?: string | null
+          pdf_path?: string | null
           price_cents?: number
           published_at?: string | null
           status?: Database["public"]["Enums"]["chapter_status"]

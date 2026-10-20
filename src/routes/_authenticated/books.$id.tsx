@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { PageHeader, StatusBadge } from "@/components/admin-shell";
-import { canEdit, countWords, isAdmin, logAction, myRolesQuery } from "@/lib/admin";
+import { canEdit, isAdmin, logAction, myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,13 +14,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 type Book = Database["public"]["Tables"]["books"]["Row"];
-type Chapter = Database["public"]["Tables"]["chapters"]["Row"];
 const BOOK_STATUSES = ["draft", "in_review", "scheduled", "published", "unpublished", "archived"] as const;
-const CH_STATUSES = ["draft", "in_review", "scheduled", "published", "unpublished"] as const;
 const ACCESS = ["free", "paid", "subscription", "per_chapter"] as const;
 
 export const Route = createFileRoute("/_authenticated/books/$id")({
@@ -49,7 +46,6 @@ function BookPage() {
     },
   });
   const [form, setForm] = useState<Book | null>(null);
-  const [editing, setEditing] = useState<Partial<Chapter> | null>(null);
   useEffect(() => { if (data?.book) setForm(data.book); }, [data?.book]);
 
   if (isLoading || !form) return <p className="text-muted-foreground">{isLoading ? "Loading…" : "Book not found."}</p>;
@@ -163,7 +159,7 @@ function BookPage() {
       <Card className="mt-6">
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle className="text-base">Chapters</CardTitle>
-          {editable && <Button size="sm" onClick={() => setEditing({ number: (data!.chapters.at(-1)?.number ?? 0) + 1, title: "", content: "", status: "draft", is_free: data!.chapters.length === 0, price_cents: 0 })}><Plus className="h-4 w-4" /> Add chapter</Button>}
+          {editable && <Button size="sm" onClick={() => navigate({ to: "/books/$id/chapters/$chapterId", params: { id, chapterId: "new" } })}><Plus className="h-4 w-4" /> Add chapter</Button>}
         </CardHeader>
         <CardContent>
           {data!.chapters.length === 0 && <p className="text-sm text-muted-foreground">No chapters yet.</p>}
@@ -171,7 +167,7 @@ function BookPage() {
             {data!.chapters.map((c) => (
               <li key={c.id} className="flex items-center gap-4 py-3">
                 <span className="w-8 text-sm text-muted-foreground">{c.number}</span>
-                <button className="flex-1 text-left text-sm font-medium hover:text-primary" onClick={() => setEditing(c)}>{c.title}</button>
+                <Link to="/books/$id/chapters/$chapterId" params={{ id, chapterId: c.id }} className="flex-1 text-sm font-medium hover:text-primary">{c.title}{c.content_type === "pdf" && <span className="ml-2 rounded bg-accent px-1.5 py-0.5 text-xs text-accent-foreground">PDF</span>}</Link>
                 <span className="text-xs text-muted-foreground">{c.word_count} words</span>
                 <span className="text-xs">{c.is_free ? "Free" : "Premium"}</span>
                 <StatusBadge status={c.status} />
@@ -180,7 +176,6 @@ function BookPage() {
           </ul>
         </CardContent>
       </Card>
-      {editing && <ChapterDialog bookId={id} chapter={editing} editable={editable} onClose={() => setEditing(null)} />}
     </>
   );
 }
@@ -189,54 +184,3 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   return <div className="space-y-1.5"><Label>{label}</Label>{children}</div>;
 }
 
-function ChapterDialog({ bookId, chapter, editable, onClose }: { bookId: string; chapter: Partial<Chapter>; editable: boolean; onClose: () => void }) {
-  const qc = useQueryClient();
-  const [c, setC] = useState(chapter);
-  async function save() {
-    const payload = {
-      book_id: bookId, number: c.number!, title: c.title!, content: c.content ?? "", status: c.status!, is_free: !!c.is_free,
-      price_cents: c.price_cents ?? 0, word_count: countWords(c.content ?? ""),
-      published_at: c.status === "published" && !c.published_at ? new Date().toISOString() : c.published_at ?? null,
-    };
-    const { error } = c.id ? await supabase.from("chapters").update(payload).eq("id", c.id) : await supabase.from("chapters").insert(payload);
-    if (error) { toast.error(error.message); return; }
-    await logAction(c.id ? "update" : "create", "chapter", c.id, c.title);
-    toast.success("Chapter saved");
-    qc.invalidateQueries({ queryKey: ["book", bookId] });
-    onClose();
-  }
-  async function remove() {
-    if (!c.id) return;
-    const { error } = await supabase.from("chapters").delete().eq("id", c.id);
-    if (error) { toast.error(error.message); return; }
-    await logAction("delete", "chapter", c.id, c.title);
-    qc.invalidateQueries({ queryKey: ["book", bookId] });
-    onClose();
-  }
-  return (
-    <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader><DialogTitle>{c.id ? "Edit chapter" : "New chapter"}</DialogTitle></DialogHeader>
-        <div className="grid gap-4 sm:grid-cols-4">
-          <Field label="No."><Input type="number" min={1} disabled={!editable} value={c.number} onChange={(e) => setC({ ...c, number: Number(e.target.value) })} /></Field>
-          <div className="sm:col-span-3"><Field label="Title"><Input disabled={!editable} value={c.title} onChange={(e) => setC({ ...c, title: e.target.value })} /></Field></div>
-          <div className="sm:col-span-4"><Field label={`Content (${countWords(c.content ?? "")} words)`}><Textarea rows={14} className="font-serif" disabled={!editable} value={c.content} onChange={(e) => setC({ ...c, content: e.target.value })} /></Field></div>
-          <Field label="Status">
-            <Select disabled={!editable} value={c.status ?? "draft"} onValueChange={(v) => setC({ ...c, status: v as Chapter["status"] })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{CH_STATUSES.map((s) => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-          <Field label="Free chapter"><div className="pt-2"><Switch disabled={!editable} checked={!!c.is_free} onCheckedChange={(v) => setC({ ...c, is_free: v })} /></div></Field>
-          {!c.is_free && <Field label="Chapter price"><Input type="number" min={0} step="0.01" disabled={!editable} value={(c.price_cents ?? 0) / 100} onChange={(e) => setC({ ...c, price_cents: Math.round(Number(e.target.value) * 100) })} /></Field>}
-        </div>
-        {editable && (
-          <div className="flex justify-between pt-2">
-            {c.id ? <Button variant="ghost" onClick={remove}><Trash2 className="h-4 w-4" /> Delete</Button> : <span />}
-            <Button onClick={save} disabled={!c.title}>Save chapter</Button>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
-}
