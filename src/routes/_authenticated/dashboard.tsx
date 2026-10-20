@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader, StatusBadge } from "@/components/admin-shell";
+import { effectiveStatus } from "@/lib/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -23,7 +24,7 @@ function Dashboard() {
       };
       const [books, published, drafts, chapters, authors, genres, recent] = await Promise.all([
         count("books"), count("books", "published"), count("books", "draft"), count("chapters"), count("authors"), count("genres"),
-        supabase.from("books").select("id,title,status,updated_at").order("updated_at", { ascending: false }).limit(6),
+        supabase.from("books").select("id,title,status,scheduled_at,updated_at").order("updated_at", { ascending: false }).limit(6),
       ]);
       return { books, published, drafts, chapters, authors, genres, recent: recent.data ?? [] };
     },
@@ -55,7 +56,7 @@ function Dashboard() {
             {data?.recent.map((b) => (
               <li key={b.id} className="flex items-center justify-between py-2">
                 <Link to="/books/$id" params={{ id: b.id }} className="text-sm font-medium hover:text-primary">{b.title}</Link>
-                <StatusBadge status={b.status} />
+                <StatusBadge status={effectiveStatus(b.status, b.scheduled_at)} />
               </li>
             ))}
           </ul>

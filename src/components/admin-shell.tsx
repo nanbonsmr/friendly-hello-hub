@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck } from "lucide-react";
+import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,34 @@ const groups = [
     label: "Content",
     items: [
       { to: "/books", label: "Books & chapters", icon: Library },
+      { to: "/series", label: "Series", icon: Layers },
       { to: "/genres", label: "Genres", icon: Tags },
       { to: "/authors", label: "Authors", icon: Users },
+      { to: "/calendar", label: "Publishing calendar", icon: CalendarDays },
     ],
   },
-  { label: "Access", items: [{ to: "/audit", label: "Audit log", icon: ShieldCheck }] },
+  {
+    label: "Business",
+    items: [
+      { to: "/subscriptions", label: "Subscriptions", icon: CreditCard },
+      { to: "/promotions", label: "Promotions", icon: Percent },
+    ],
+  },
+  {
+    label: "Community",
+    items: [
+      { to: "/moderation", label: "Reviews & moderation", icon: MessageSquareWarning },
+      { to: "/support", label: "Support", icon: LifeBuoy },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      { to: "/staff", label: "Staff & roles", icon: UserCog },
+      { to: "/audit", label: "Audit log", icon: ShieldCheck },
+      { to: "/settings", label: "Settings", icon: Settings },
+    ],
+  },
 ] as const;
 
 export function AdminShell() {
@@ -35,7 +58,7 @@ export function AdminShell() {
   }
 
   const nav = (
-    <nav className="flex h-full flex-col gap-6 p-4">
+    <nav className="flex h-full flex-col gap-5 overflow-y-auto p-4">
       <div className="flex items-center gap-2 px-2 py-1">
         <BookOpen className="h-5 w-5 text-sidebar-primary" />
         <span className="font-semibold text-sidebar-accent-foreground">Hawwii Admin</span>
