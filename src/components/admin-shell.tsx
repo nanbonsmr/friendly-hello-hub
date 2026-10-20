@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog, Receipt, ChevronDown } from "lucide-react";
+import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog, Receipt, ChevronDown, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const groups = [
-  { label: "Overview", items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
+  { label: "Overview", items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }, { to: "/analytics", label: "Reading analytics", icon: TrendingUp }] },
   {
     label: "Content",
     items: [
