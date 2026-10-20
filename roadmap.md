@@ -1,8 +1,18 @@
 # Hawwii Admin roadmap
 - [x] Sign-in, staff roles, first user = Super Admin
-- [x] Dashboard, books, chapters editor, genres, authors, audit log
-- [ ] Role management screen (grant/revoke staff roles)
-- [ ] Media library with cover uploads (storage)
-- [ ] Orders, payments, refunds, subscriptions (needs payment provider)
-- [ ] Promotions, reviews & moderation, notifications
-- [ ] Publishing calendar, analytics, settings, support tickets
+- [x] Dashboard, books, chapters (text + PDF, full page), genres, authors, audit log
+- [x] Staff management (invite, roles, activate/deactivate)
+- [x] Subscriptions (plans + subscribers)
+- [x] Automatic scheduled publishing (books + chapters)
+- [x] Reviews & moderation, content reports
+- [x] Publishing calendar
+- [x] Promotions
+- [x] Series
+- [x] Rights & copyright per book
+- [x] Platform settings
+- [x] Support tickets
+- [x] Chapter version history + restore
+- [ ] Cover image upload
+- [ ] Reader app connection
+- [ ] Payments and orders (needs payment provider choice)
+- [ ] Reading analytics, notifications
