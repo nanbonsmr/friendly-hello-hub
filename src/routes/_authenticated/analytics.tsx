@@ -40,7 +40,7 @@ function AnalyticsPage() {
       const chapterInfo = new Map((chapters.data ?? []).map((c) => [c.id, { title: c.title, book: bookTitles.get(c.book_id) ?? "—" }]));
       const topBooks = ((bookStats.data ?? []) as BookStat[]).filter((b) => b.opens > 0).sort((a, b) => b.opens - a.opens);
       const topChapters = ((chapterStats.data ?? []) as ChapterStat[]).filter((c) => c.opens > 0).sort((a, b) => b.opens - a.opens);
-      return { overall: overall.data, topBooks, topChapters, chapterInfo };
+      return { overall: overall.data, topBooks, topChapters, chapterInfo, bookTitles };
     },
   });
 
@@ -89,7 +89,7 @@ function AnalyticsPage() {
               <TableBody>
                 {data!.topBooks.map((b) => (
                   <TableRow key={b.book_id}>
-                    <TableCell className="font-medium">{data!.topBooks.find((x) => x.book_id === b.book_id) && <span>{b.last_event_at ? new Date(b.last_event_at).toLocaleDateString() : ""}</span>}</TableCell>
+                    <TableCell className="font-medium">{data!.bookTitles.get(b.book_id) ?? "—"}</TableCell>
                     <TableCell className="text-right">{b.opens}</TableCell>
                     <TableCell className="text-right">{b.unique_readers}</TableCell>
                     <TableCell className="text-right">{b.completes}</TableCell>

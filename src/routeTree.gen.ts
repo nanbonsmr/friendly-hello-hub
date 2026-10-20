@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/audit'
 import { Route as AuthenticatedAuthorsRouteImport } from './routes/_authenticated/authors'
 import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticated/calendar'
@@ -27,6 +28,7 @@ import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedBooksIndexRouteImport } from './routes/_authenticated/books.index'
 import { Route as AuthenticatedBooksIdRouteImport } from './routes/_authenticated/books.$id'
+import { Route as ApiPublicAnalyticsEventsRouteImport } from './routes/api/public/analytics/events'
 import { Route as ApiPublicPaymentsVerifyRouteImport } from './routes/api/public/payments/verify'
 import { Route as AuthenticatedBooksIdChaptersChapterIdRouteImport } from './routes/_authenticated/books.$id_.chapters.$chapterId'
 
@@ -43,6 +45,11 @@ const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAuditRoute = AuthenticatedAuditRouteImport.update({
   id: '/audit',
@@ -120,6 +127,12 @@ const AuthenticatedBooksIdRoute = AuthenticatedBooksIdRouteImport.update({
   path: '/books/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicAnalyticsEventsRoute =
+  ApiPublicAnalyticsEventsRouteImport.update({
+    id: '/api/public/analytics/events',
+    path: '/api/public/analytics/events',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsVerifyRoute = ApiPublicPaymentsVerifyRouteImport.update({
   id: '/api/public/payments/verify',
   path: '/api/public/payments/verify',
@@ -135,6 +148,7 @@ const AuthenticatedBooksIdChaptersChapterIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/authors': typeof AuthenticatedAuthorsRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -150,12 +164,14 @@ export interface FileRoutesByFullPath {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/analytics/events': typeof ApiPublicAnalyticsEventsRoute
   '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/audit': typeof AuthenticatedAuditRoute
   '/authors': typeof AuthenticatedAuthorsRoute
   '/calendar': typeof AuthenticatedCalendarRoute
@@ -171,6 +187,7 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books': typeof AuthenticatedBooksIndexRoute
+  '/api/public/analytics/events': typeof ApiPublicAnalyticsEventsRoute
   '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
@@ -179,6 +196,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/audit': typeof AuthenticatedAuditRoute
   '/_authenticated/authors': typeof AuthenticatedAuthorsRoute
   '/_authenticated/calendar': typeof AuthenticatedCalendarRoute
@@ -194,6 +212,7 @@ export interface FileRoutesById {
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/books/$id': typeof AuthenticatedBooksIdRoute
   '/_authenticated/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/analytics/events': typeof ApiPublicAnalyticsEventsRoute
   '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/_authenticated/books/$id_/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
@@ -202,6 +221,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/analytics'
     | '/audit'
     | '/authors'
     | '/calendar'
@@ -217,12 +237,14 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books/'
+    | '/api/public/analytics/events'
     | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/analytics'
     | '/audit'
     | '/authors'
     | '/calendar'
@@ -238,6 +260,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books'
+    | '/api/public/analytics/events'
     | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   id:
@@ -245,6 +268,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/analytics'
     | '/_authenticated/audit'
     | '/_authenticated/authors'
     | '/_authenticated/calendar'
@@ -260,6 +284,7 @@ export interface FileRouteTypes {
     | '/_authenticated/support'
     | '/_authenticated/books/$id'
     | '/_authenticated/books/'
+    | '/api/public/analytics/events'
     | '/api/public/payments/verify'
     | '/_authenticated/books/$id_/chapters/$chapterId'
   fileRoutesById: FileRoutesById
@@ -268,6 +293,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicAnalyticsEventsRoute: typeof ApiPublicAnalyticsEventsRoute
   ApiPublicPaymentsVerifyRoute: typeof ApiPublicPaymentsVerifyRoute
 }
 
@@ -293,6 +319,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/audit': {
       id: '/_authenticated/audit'
@@ -399,6 +432,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBooksIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/analytics/events': {
+      id: '/api/public/analytics/events'
+      path: '/api/public/analytics/events'
+      fullPath: '/api/public/analytics/events'
+      preLoaderRoute: typeof ApiPublicAnalyticsEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/verify': {
       id: '/api/public/payments/verify'
       path: '/api/public/payments/verify'
@@ -417,6 +457,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedAuditRoute: typeof AuthenticatedAuditRoute
   AuthenticatedAuthorsRoute: typeof AuthenticatedAuthorsRoute
   AuthenticatedCalendarRoute: typeof AuthenticatedCalendarRoute
@@ -436,6 +477,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedAuditRoute: AuthenticatedAuditRoute,
   AuthenticatedAuthorsRoute: AuthenticatedAuthorsRoute,
   AuthenticatedCalendarRoute: AuthenticatedCalendarRoute,
@@ -462,6 +504,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicAnalyticsEventsRoute: ApiPublicAnalyticsEventsRoute,
   ApiPublicPaymentsVerifyRoute: ApiPublicPaymentsVerifyRoute,
 }
 export const routeTree = rootRouteImport
