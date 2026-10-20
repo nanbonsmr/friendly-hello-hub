@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/admin-shell";
 import { isAdmin, logAction, myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,8 @@ function SettingsPage() {
           <CardContent className="space-y-4">
             <div className="space-y-1"><Label>Default currency</Label><Input disabled={!can} maxLength={3} value={s.default_currency} onChange={(e) => setS({ ...s, default_currency: e.target.value.toUpperCase() })} /></div>
             <div className="space-y-1"><Label>Default chapter price</Label><Input type="number" min={0} step="0.01" disabled={!can} value={s.default_chapter_price_cents / 100} onChange={(e) => setS({ ...s, default_chapter_price_cents: Math.round(Number(e.target.value) * 100) })} /></div>
+            <div className="space-y-1"><Label>Receiving account name(s)</Label><Textarea rows={2} disabled={!can} placeholder="Exact name on your telebirr / bank account, one per line" value={s.payment_receiver_names ?? ""} onChange={(e) => setS({ ...s, payment_receiver_names: e.target.value || null })} /><p className="text-xs text-muted-foreground">Receipts are only accepted if the money went to one of these names.</p></div>
+            <div className="space-y-1"><Label>Payment instructions for readers</Label><Textarea rows={3} disabled={!can} placeholder="e.g. Send to telebirr 09xx… (Hawwii PLC), then paste your receipt link." value={s.payment_instructions ?? ""} onChange={(e) => setS({ ...s, payment_instructions: e.target.value || null })} /></div>
             <div className="space-y-1"><Label>Free preview chapters per book</Label><Input type="number" min={0} disabled={!can} value={s.free_preview_chapters} onChange={(e) => setS({ ...s, free_preview_chapters: Number(e.target.value) })} /></div>
           </CardContent>
         </Card>

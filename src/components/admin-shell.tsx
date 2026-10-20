@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog } from "lucide-react";
+import { BookOpen, LayoutDashboard, Library, Tags, Users, LogOut, Menu, ShieldCheck, CalendarDays, Layers, CreditCard, Percent, MessageSquareWarning, LifeBuoy, Settings, UserCog, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { myRolesQuery } from "@/lib/admin";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const groups = [
   {
     label: "Business",
     items: [
+      { to: "/orders", label: "Orders & payments", icon: Receipt },
       { to: "/subscriptions", label: "Subscriptions", icon: CreditCard },
       { to: "/promotions", label: "Promotions", icon: Percent },
     ],

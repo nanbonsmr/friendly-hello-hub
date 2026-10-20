@@ -48,7 +48,7 @@ export function normaliseReceipt(r: Receipt) {
 }
 
 export function receiverMatches(receiver: string | null, allowed: string[]) {
-  if (allowed.length === 0) return true;
+  if (allowed.length === 0) return false;
   if (!receiver) return false;
   const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9\u1200-\u137f]+/g, " ").trim();
   const r = norm(receiver);
@@ -143,6 +143,7 @@ export async function verifyPurchase(userId: string, item: PurchaseItem, receipt
   if (!statusOk(r.status)) return reject("The bank says this transaction is not completed.", extra);
   const { data: s } = await db.from("platform_settings").select("payment_receiver_names").eq("id", 1).single();
   const allowed = (s?.payment_receiver_names ?? "").split(/[,\n]/).map((x) => x.trim()).filter(Boolean);
+  if (allowed.length === 0) return reject("Payments are not set up yet: no receiving account name configured.", extra);
   if (!receiverMatches(r.receiver, allowed)) return reject("This payment was not sent to our account.", extra);
   if (r.amount == null || Math.round(r.amount * 100) < priceCents) return reject(`Amount paid is less than the price (${(priceCents / 100).toFixed(2)} ETB).`, extra);
 

@@ -26,6 +26,7 @@ import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedBooksIndexRouteImport } from './routes/_authenticated/books.index'
 import { Route as AuthenticatedBooksIdRouteImport } from './routes/_authenticated/books.$id'
+import { Route as ApiPublicPaymentsVerifyRouteImport } from './routes/api/public/payments/verify'
 import { Route as AuthenticatedBooksIdChaptersChapterIdRouteImport } from './routes/_authenticated/books.$id_.chapters.$chapterId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -113,6 +114,11 @@ const AuthenticatedBooksIdRoute = AuthenticatedBooksIdRouteImport.update({
   path: '/books/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicPaymentsVerifyRoute = ApiPublicPaymentsVerifyRouteImport.update({
+  id: '/api/public/payments/verify',
+  path: '/api/public/payments/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedBooksIdChaptersChapterIdRoute =
   AuthenticatedBooksIdChaptersChapterIdRouteImport.update({
     id: '/books/$id_/chapters/$chapterId',
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesByTo {
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesById {
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/books/$id': typeof AuthenticatedBooksIdRoute
   '/_authenticated/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/_authenticated/books/$id_/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRouteTypes {
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books/'
+    | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -217,6 +227,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books'
+    | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   id:
     | '__root__'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/_authenticated/support'
     | '/_authenticated/books/$id'
     | '/_authenticated/books/'
+    | '/api/public/payments/verify'
     | '/_authenticated/books/$id_/chapters/$chapterId'
   fileRoutesById: FileRoutesById
 }
@@ -244,6 +256,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicPaymentsVerifyRoute: typeof ApiPublicPaymentsVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -367,6 +380,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBooksIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/payments/verify': {
+      id: '/api/public/payments/verify'
+      path: '/api/public/payments/verify'
+      fullPath: '/api/public/payments/verify'
+      preLoaderRoute: typeof ApiPublicPaymentsVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/books/$id_/chapters/$chapterId': {
       id: '/_authenticated/books/$id_/chapters/$chapterId'
       path: '/books/$id/chapters/$chapterId'
@@ -421,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicPaymentsVerifyRoute: ApiPublicPaymentsVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
