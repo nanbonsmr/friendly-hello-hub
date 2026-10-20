@@ -3,10 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const myRolesQuery = queryOptions({
   queryKey: ["my-roles"],
+  staleTime: 5 * 60_000,
   queryFn: async () => {
-    const { data: u } = await supabase.auth.getUser();
-    if (!u.user) return [];
-    const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
+    const { data: s } = await supabase.auth.getSession();
+    const uid = s.session?.user.id;
+    if (!uid) return [];
+    const { data, error } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     if (error) throw error;
     return data.map((r) => r.role);
   },
