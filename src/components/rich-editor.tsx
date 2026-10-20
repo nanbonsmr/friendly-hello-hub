@@ -103,7 +103,7 @@ function Toolbar({ editor, full, setFull }: { editor: Editor; full: boolean; set
     else ch().toggleHeading({ level: Number(v[1]) as 1 | 2 | 3 | 4 }).run();
   }
   function link() {
-    const prev = editor.getAttributes("link").href as string | undefined;
+    const prev = editor.getAttributes("link")["href"] as string | undefined;
     const url = window.prompt("Link URL (leave empty to remove)", prev ?? "https://");
     if (url === null) return;
     if (!url) ch().extendMarkRange("link").unsetLink().run();
