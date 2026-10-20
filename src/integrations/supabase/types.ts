@@ -157,6 +157,7 @@ export type Database = {
       books: {
         Row: {
           access_type: Database["public"]["Enums"]["access_type"]
+          cover_path: string | null
           cover_url: string | null
           created_at: string
           created_by: string | null
@@ -177,6 +178,7 @@ export type Database = {
         }
         Insert: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          cover_path?: string | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -197,6 +199,7 @@ export type Database = {
         }
         Update: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          cover_path?: string | null
           cover_url?: string | null
           created_at?: string
           created_by?: string | null
@@ -678,6 +681,54 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_events: {
+        Row: {
+          book_id: string
+          chapter_id: string | null
+          created_at: string
+          duration_seconds: number | null
+          event_type: string
+          id: string
+          progress: number | null
+          reader_id: string
+        }
+        Insert: {
+          book_id: string
+          chapter_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          event_type: string
+          id?: string
+          progress?: number | null
+          reader_id: string
+        }
+        Update: {
+          book_id?: string
+          chapter_id?: string | null
+          created_at?: string
+          duration_seconds?: number | null
+          event_type?: string
+          id?: string
+          progress?: number | null
+          reader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_events_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_events_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           body: string | null
@@ -973,7 +1024,60 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      book_reading_stats: {
+        Row: {
+          book_id: string | null
+          completes: number | null
+          last_event_at: string | null
+          opens: number | null
+          seconds_read: number | null
+          unique_readers: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_events_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chapter_reading_stats: {
+        Row: {
+          book_id: string | null
+          chapter_id: string | null
+          completes: number | null
+          opens: number | null
+          unique_readers: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_events_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_events_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overall_reading_stats: {
+        Row: {
+          completes: number | null
+          opens: number | null
+          seconds_read: number | null
+          total_events: number | null
+          unique_readers: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       can_edit_content: { Args: { _user_id: string }; Returns: boolean }
