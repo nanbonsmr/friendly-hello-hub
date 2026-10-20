@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, ImagePlus, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
@@ -20,6 +20,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 type Book = Database["public"]["Tables"]["books"]["Row"];
 const BOOK_STATUSES = ["draft", "in_review", "scheduled", "published", "unpublished", "archived"] as const;
 const ACCESS = ["free", "paid", "subscription", "per_chapter"] as const;
+const COVER_BUCKET = "book-covers";
+const COVER_MAX_MB = 5;
 
 export const Route = createFileRoute("/_authenticated/books/$id")({
   head: () => ({ meta: [{ title: "Edit book — Hawwii Admin" }, { name: "description", content: "Edit book details and chapters." }, { property: "og:title", content: "Edit book — Hawwii Admin" }, { property: "og:description", content: "Edit book details and chapters." }] }),
@@ -47,20 +49,66 @@ function BookPage() {
     },
   });
   const [form, setForm] = useState<Book | null>(null);
+  const [busy, setBusy] = useState(false);
+  const coverRef = useRef<HTMLInputElement>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverRemoved, setCoverRemoved] = useState(false);
+  const [coverObjectUrl, setCoverObjectUrl] = useState<string | null>(null);
+  const [coverSignedUrl, setCoverSignedUrl] = useState<string | null>(null);
   useEffect(() => { if (data?.book) setForm(data.book); }, [data?.book]);
+
+  // Cover preview: freshly picked file, or a signed link for the stored image.
+  useEffect(() => {
+    if (!coverFile) { setCoverObjectUrl(null); return undefined; }
+    const u = URL.createObjectURL(coverFile);
+    setCoverObjectUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [coverFile]);
+  useEffect(() => {
+    const path = form?.cover_path;
+    if (!path) { setCoverSignedUrl(null); return undefined; }
+    let alive = true;
+    supabase.storage.from(COVER_BUCKET).createSignedUrl(path, 3600).then(({ data: s }) => { if (alive) setCoverSignedUrl(s?.signedUrl ?? null); });
+    return () => { alive = false; };
+  }, [form?.cover_path]);
 
   if (isLoading || !form) return <p className="text-muted-foreground">{isLoading ? "Loading…" : "Book not found."}</p>;
   const set = <K extends keyof Book>(k: K, v: Book[K]) => setForm({ ...form, [k]: v });
+  const coverPreview = coverFile ? coverObjectUrl : coverRemoved ? null : form.cover_path ? coverSignedUrl : form.cover_url || null;
 
   async function save() {
     if (!form) return;
-    const { id: _id, created_at, updated_at, created_by, ...rest } = form;
-    const patch = { ...rest, published_at: form.status === "published" && !form.published_at ? new Date().toISOString() : form.published_at };
-    const { error } = await supabase.from("books").update(patch).eq("id", id);
-    if (error) { toast.error(error.message); return; }
-    await logAction("update", "book", id, `status=${form.status}`);
-    toast.success("Book saved");
-    qc.invalidateQueries({ queryKey: ["book", id] });
+    setBusy(true);
+    try {
+      const { id: _id, created_at, updated_at, created_by, ...rest } = form;
+      let cover_url = form.cover_url ?? null;
+      let cover_path = form.cover_path ?? null;
+      if (coverFile) {
+        const ext = (coverFile.name.split(".").pop() ?? "jpg").toLowerCase();
+        const path = `${id}/${crypto.randomUUID()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from(COVER_BUCKET).upload(path, coverFile, { contentType: coverFile.type });
+        if (upErr) throw upErr;
+        if (cover_path) await supabase.storage.from(COVER_BUCKET).remove([cover_path]);
+        cover_path = path;
+      } else if (coverRemoved && cover_path) {
+        await supabase.storage.from(COVER_BUCKET).remove([cover_path]);
+        cover_path = null;
+      }
+      if (coverRemoved && !coverFile) cover_url = null;
+      const patch = { ...rest, cover_url, cover_path, published_at: form.status === "published" && !form.published_at ? new Date().toISOString() : form.published_at };
+      const { error } = await supabase.from("books").update(patch).eq("id", id);
+      if (error) throw error;
+      await logAction("update", "book", id, `status=${form.status}${coverFile ? " (cover uploaded)" : ""}`);
+      toast.success("Book saved");
+      setCoverFile(null);
+      setCoverRemoved(false);
+      qc.invalidateQueries({ queryKey: ["book", id] });
+      qc.invalidateQueries({ queryKey: ["books"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not save book");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function toggleAuthor(aid: string, on: boolean) {
@@ -72,11 +120,27 @@ function BookPage() {
   }
 
   async function del() {
+    const { data: row } = await supabase.from("books").select("cover_path").eq("id", id).maybeSingle();
     const { error } = await supabase.from("books").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
+    if (row?.cover_path) await supabase.storage.from(COVER_BUCKET).remove([row.cover_path]);
     await logAction("delete", "book", id, form?.title);
     toast.success("Book deleted");
     navigate({ to: "/books" });
+  }
+
+  function pickCover(f: File | undefined) {
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+    if (f.size > COVER_MAX_MB * 1024 * 1024) { toast.error(`Image must be under ${COVER_MAX_MB} MB.`); return; }
+    setCoverFile(f);
+    setCoverRemoved(false);
+  }
+
+  function removeCover() {
+    setCoverFile(null);
+    setCoverRemoved(true);
+    if (coverRef.current) coverRef.current.value = "";
   }
 
   return (
@@ -96,7 +160,7 @@ function BookPage() {
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            {editable && <Button onClick={save}>Save changes</Button>}
+            {editable && <Button onClick={save} disabled={busy}>{busy ? "Saving…" : "Save changes"}</Button>}
           </div>
         }
       />
@@ -107,7 +171,31 @@ function BookPage() {
             <Field label="Title"><Input disabled={!editable} value={form.title} onChange={(e) => set("title", e.target.value)} /></Field>
             <Field label="Subtitle"><Input disabled={!editable} value={form.subtitle ?? ""} onChange={(e) => set("subtitle", e.target.value)} /></Field>
             <div className="sm:col-span-2"><Field label="Description"><Textarea disabled={!editable} rows={4} value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} /></Field></div>
-            <Field label="Cover image URL"><Input disabled={!editable} value={form.cover_url ?? ""} onChange={(e) => set("cover_url", e.target.value)} /></Field>
+            <div className="sm:col-span-2">
+              <Label>Cover image</Label>
+              <div className="mt-1.5 flex gap-4">
+                <div className="flex h-40 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-muted">
+                  {coverPreview ? <img src={coverPreview} alt="Cover preview" className="h-full w-full object-cover" /> : <ImagePlus className="h-6 w-6 text-muted-foreground" />}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    {editable && (
+                      <>
+                        <input ref={coverRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => pickCover(e.target.files?.[0])} />
+                        <Button type="button" variant="outline" size="sm" onClick={() => coverRef.current?.click()}>
+                          <ImagePlus className="h-4 w-4" /> {coverFile || form.cover_path ? "Replace image" : "Upload image"}
+                        </Button>
+                      </>
+                    )}
+                    {editable && (coverFile || form.cover_url || form.cover_path) && !coverRemoved && (
+                      <Button type="button" variant="ghost" size="sm" onClick={removeCover}>Remove</Button>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">JPG, PNG or WebP, up to {COVER_MAX_MB} MB. The new image appears once you save.</p>
+                  <Field label="Or paste an image URL"><Input disabled={!editable} value={form.cover_url ?? ""} onChange={(e) => { setCoverFile(null); setCoverRemoved(false); set("cover_url", e.target.value); }} /></Field>
+                </div>
+              </div>
+            </div>
             <Field label="ISBN"><Input disabled={!editable} value={form.isbn ?? ""} onChange={(e) => set("isbn", e.target.value)} /></Field>
             <Field label="Language"><Input disabled={!editable} value={form.language} onChange={(e) => set("language", e.target.value)} /></Field>
             <Field label="Genre">

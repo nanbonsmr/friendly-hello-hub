@@ -14,3 +14,4 @@
 - Staff roles live only in `public.user_roles`; the first signup is auto-granted `super_admin` by the `handle_new_user` trigger — why: avoids privilege escalation through editable profile data.
 - Shared admin helpers (role query, slug, price, audit logging) live in `src/lib/admin.ts`; shell/layout components in `src/components/admin-shell.tsx`.
 - Payments are bank/telebirr receipt verification via links.et (`src/lib/payments.server.ts`); orders/entitlements are written only server-side with the admin client after the receipt checks pass — why: readers must not grant themselves access. Never log receipt URLs.
+- Reader-app reading events arrive through the bearer-verified public route `src/routes/api/public/analytics/events.ts` into `public.reading_events`; admin analytics reads the `*_reading_stats` security-invoker views — why: readers are untrusted callers and stats must respect RLS.

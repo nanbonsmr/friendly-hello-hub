@@ -122,7 +122,7 @@ function BookActions({ id, title, status, editable, admin }: { id: string; title
   async function duplicate() {
     const { data: b, error } = await supabase.from("books").select("*").eq("id", id).single();
     if (error) { toast.error(error.message); return; }
-    const { id: _i, created_at: _c, updated_at: _u, published_at: _p, ...rest } = b;
+    const { id: _i, created_at: _c, updated_at: _u, published_at: _p, cover_url: _cv, cover_path: _cp, ...rest } = b;
     const { data: u } = await supabase.auth.getUser();
     const copyTitle = `${title} (copy)`;
     const { data: nb, error: e2 } = await supabase.from("books")
@@ -151,11 +151,15 @@ function BookActions({ id, title, status, editable, admin }: { id: string; title
   }
 
   async function del() {
-    const { data: files } = await supabase.from("chapters").select("pdf_path").eq("book_id", id).not("pdf_path", "is", null);
+    const [{ data: files }, { data: b }] = await Promise.all([
+      supabase.from("chapters").select("pdf_path").eq("book_id", id).not("pdf_path", "is", null),
+      supabase.from("books").select("cover_path").eq("id", id).maybeSingle(),
+    ]);
     const { error } = await supabase.from("books").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     const paths = (files ?? []).map((f) => f.pdf_path).filter((p): p is string => !!p);
     if (paths.length) await supabase.storage.from("chapter-files").remove(paths);
+    if (b?.cover_path) await supabase.storage.from("book-covers").remove([b.cover_path]);
     await logAction("delete", "book", id, title);
     toast.success("Book deleted");
     refresh();
