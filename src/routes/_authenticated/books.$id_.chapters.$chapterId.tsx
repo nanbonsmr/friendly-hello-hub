@@ -10,7 +10,7 @@ import { canEdit, countWords, logAction, myRolesQuery, toLocalInput } from "@/li
 import { ChapterRevisions } from "@/components/chapter-revisions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichEditor } from "@/components/rich-editor";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,7 +104,7 @@ function ChapterPage() {
         book_id: bookId, number: c.number ?? 1, title: c.title, status: c.status ?? "draft",
         content_type: isPdf ? "pdf" : "text",
         content: c.content ?? "",
-        word_count: isPdf ? 0 : countWords(c.content ?? ""),
+        word_count: isPdf ? 0 : countWords(plain(c.content ?? "")),
         pdf_path, pdf_name,
         is_free: !!c.is_free, price_cents: c.price_cents ?? 0,
         scheduled_at: c.status === "scheduled" ? c.scheduled_at ?? null : null,
@@ -144,7 +144,7 @@ function ChapterPage() {
       </Link>
       <PageHeader
         title={isNew ? "New chapter" : `Chapter ${c.number}`}
-        description={isPdf ? "PDF chapter" : `${countWords(c.content ?? "")} words`}
+        description={isPdf ? "PDF chapter" : `${countWords(plain(c.content ?? ""))} words`}
         action={editable && (
           <div className="flex gap-2">
             {!isNew && <Button variant="outline" onClick={remove}><Trash2 className="h-4 w-4" /> Delete</Button>}
@@ -190,9 +190,7 @@ function ChapterPage() {
                 {pdfUrl && <iframe src={pdfUrl} title="PDF preview" className="h-[70vh] w-full rounded-lg border" />}
               </div>
             ) : (
-              <Field label="Content">
-                <Textarea rows={28} className="min-h-[60vh] font-serif text-base leading-relaxed" disabled={!editable} value={c.content ?? ""} onChange={(e) => setC({ ...c, content: e.target.value })} placeholder="Start writing…" />
-              </Field>
+              <RichEditor key={c.id ?? "new"} editable={editable} value={c.content ?? ""} onChange={(html) => setC((prev) => ({ ...prev, content: html }))} />
             )}
           </CardContent>
         </Card>
@@ -230,4 +228,8 @@ function ChapterPage() {
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return <div className="space-y-1.5"><Label>{label}</Label>{children}</div>;
+}
+
+function plain(html: string) {
+  return html.replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ");
 }
