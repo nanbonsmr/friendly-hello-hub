@@ -18,6 +18,7 @@ import { Route as AuthenticatedCalendarRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedGenresRouteImport } from './routes/_authenticated/genres'
 import { Route as AuthenticatedModerationRouteImport } from './routes/_authenticated/moderation'
+import { Route as AuthenticatedOrdersRouteImport } from './routes/_authenticated/orders'
 import { Route as AuthenticatedPromotionsRouteImport } from './routes/_authenticated/promotions'
 import { Route as AuthenticatedSeriesRouteImport } from './routes/_authenticated/series'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -26,6 +27,7 @@ import { Route as AuthenticatedSubscriptionsRouteImport } from './routes/_authen
 import { Route as AuthenticatedSupportRouteImport } from './routes/_authenticated/support'
 import { Route as AuthenticatedBooksIndexRouteImport } from './routes/_authenticated/books.index'
 import { Route as AuthenticatedBooksIdRouteImport } from './routes/_authenticated/books.$id'
+import { Route as ApiPublicPaymentsVerifyRouteImport } from './routes/api/public/payments/verify'
 import { Route as AuthenticatedBooksIdChaptersChapterIdRouteImport } from './routes/_authenticated/books.$id_.chapters.$chapterId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -72,6 +74,11 @@ const AuthenticatedModerationRoute = AuthenticatedModerationRouteImport.update({
   path: '/moderation',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOrdersRoute = AuthenticatedOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedPromotionsRoute = AuthenticatedPromotionsRouteImport.update({
   id: '/promotions',
   path: '/promotions',
@@ -113,6 +120,11 @@ const AuthenticatedBooksIdRoute = AuthenticatedBooksIdRouteImport.update({
   path: '/books/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicPaymentsVerifyRoute = ApiPublicPaymentsVerifyRouteImport.update({
+  id: '/api/public/payments/verify',
+  path: '/api/public/payments/verify',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedBooksIdChaptersChapterIdRoute =
   AuthenticatedBooksIdChaptersChapterIdRouteImport.update({
     id: '/books/$id_/chapters/$chapterId',
@@ -129,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/promotions': typeof AuthenticatedPromotionsRoute
   '/series': typeof AuthenticatedSeriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -137,6 +150,7 @@ export interface FileRoutesByFullPath {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesByTo {
@@ -148,6 +162,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
   '/moderation': typeof AuthenticatedModerationRoute
+  '/orders': typeof AuthenticatedOrdersRoute
   '/promotions': typeof AuthenticatedPromotionsRoute
   '/series': typeof AuthenticatedSeriesRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -156,6 +171,7 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRoutesById {
@@ -169,6 +185,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/genres': typeof AuthenticatedGenresRoute
   '/_authenticated/moderation': typeof AuthenticatedModerationRoute
+  '/_authenticated/orders': typeof AuthenticatedOrdersRoute
   '/_authenticated/promotions': typeof AuthenticatedPromotionsRoute
   '/_authenticated/series': typeof AuthenticatedSeriesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -177,6 +194,7 @@ export interface FileRoutesById {
   '/_authenticated/support': typeof AuthenticatedSupportRoute
   '/_authenticated/books/$id': typeof AuthenticatedBooksIdRoute
   '/_authenticated/books/': typeof AuthenticatedBooksIndexRoute
+  '/api/public/payments/verify': typeof ApiPublicPaymentsVerifyRoute
   '/_authenticated/books/$id_/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
 }
 export interface FileRouteTypes {
@@ -190,6 +208,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/genres'
     | '/moderation'
+    | '/orders'
     | '/promotions'
     | '/series'
     | '/settings'
@@ -198,6 +217,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books/'
+    | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -209,6 +229,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/genres'
     | '/moderation'
+    | '/orders'
     | '/promotions'
     | '/series'
     | '/settings'
@@ -217,6 +238,7 @@ export interface FileRouteTypes {
     | '/support'
     | '/books/$id'
     | '/books'
+    | '/api/public/payments/verify'
     | '/books/$id/chapters/$chapterId'
   id:
     | '__root__'
@@ -229,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/genres'
     | '/_authenticated/moderation'
+    | '/_authenticated/orders'
     | '/_authenticated/promotions'
     | '/_authenticated/series'
     | '/_authenticated/settings'
@@ -237,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated/support'
     | '/_authenticated/books/$id'
     | '/_authenticated/books/'
+    | '/api/public/payments/verify'
     | '/_authenticated/books/$id_/chapters/$chapterId'
   fileRoutesById: FileRoutesById
 }
@@ -244,6 +268,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicPaymentsVerifyRoute: typeof ApiPublicPaymentsVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -311,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedModerationRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/orders': {
+      id: '/_authenticated/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/promotions': {
       id: '/_authenticated/promotions'
       path: '/promotions'
@@ -367,6 +399,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBooksIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/payments/verify': {
+      id: '/api/public/payments/verify'
+      path: '/api/public/payments/verify'
+      fullPath: '/api/public/payments/verify'
+      preLoaderRoute: typeof ApiPublicPaymentsVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/books/$id_/chapters/$chapterId': {
       id: '/_authenticated/books/$id_/chapters/$chapterId'
       path: '/books/$id/chapters/$chapterId'
@@ -384,6 +423,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGenresRoute: typeof AuthenticatedGenresRoute
   AuthenticatedModerationRoute: typeof AuthenticatedModerationRoute
+  AuthenticatedOrdersRoute: typeof AuthenticatedOrdersRoute
   AuthenticatedPromotionsRoute: typeof AuthenticatedPromotionsRoute
   AuthenticatedSeriesRoute: typeof AuthenticatedSeriesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -402,6 +442,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGenresRoute: AuthenticatedGenresRoute,
   AuthenticatedModerationRoute: AuthenticatedModerationRoute,
+  AuthenticatedOrdersRoute: AuthenticatedOrdersRoute,
   AuthenticatedPromotionsRoute: AuthenticatedPromotionsRoute,
   AuthenticatedSeriesRoute: AuthenticatedSeriesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
@@ -421,6 +462,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicPaymentsVerifyRoute: ApiPublicPaymentsVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
