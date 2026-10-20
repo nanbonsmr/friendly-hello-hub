@@ -27,14 +27,14 @@ function AuthorsPage() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("authors").insert({ name: f.name, email: f.email || null, bio: f.bio || null });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("create", "author", undefined, f.name);
     setF({ name: "", email: "", bio: "" });
     qc.invalidateQueries({ queryKey: ["authors"] });
   }
   async function remove(id: string) {
     const { error } = await supabase.from("authors").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["authors"] });
   }
   return (

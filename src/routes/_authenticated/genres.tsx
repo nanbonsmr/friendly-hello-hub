@@ -26,14 +26,14 @@ function GenresPage() {
   async function add(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.from("genres").insert({ name, slug: slugify(name) });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("create", "genre", undefined, name);
     setName("");
     qc.invalidateQueries({ queryKey: ["genres"] });
   }
   async function remove(id: string) {
     const { error } = await supabase.from("genres").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["genres"] });
   }
   return (

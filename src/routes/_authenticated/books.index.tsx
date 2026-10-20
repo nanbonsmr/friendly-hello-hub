@@ -87,11 +87,11 @@ function NewBookDialog() {
     const { data: u } = await supabase.auth.getUser();
     const { data, error } = await supabase
       .from("books")
-      .insert({ title, slug: `${slugify(title)}-${Math.random().toString(36).slice(2, 6)}`, created_by: u.user?.id })
+      .insert({ title, slug: `${slugify(title)}-${Math.random().toString(36).slice(2, 6)}`, created_by: u.user?.id ?? null })
       .select("id")
       .single();
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("create", "book", data.id, title);
     toast.success("Book created");
     navigate({ to: "/books/$id", params: { id: data.id } });

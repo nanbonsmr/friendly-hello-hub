@@ -31,5 +31,5 @@ export function formatPrice(cents: number, currency = "USD") {
 export async function logAction(action: string, entity_type: string, entity_id?: string, details?: string) {
   const { data } = await supabase.auth.getUser();
   if (!data.user) return;
-  await supabase.from("audit_logs").insert({ actor_id: data.user.id, action, entity_type, entity_id, details });
+  await supabase.from("audit_logs").insert({ actor_id: data.user.id, action, entity_type, entity_id: entity_id ?? null, details: details ?? null });
 }

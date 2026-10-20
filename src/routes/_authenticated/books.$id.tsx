@@ -60,7 +60,7 @@ function BookPage() {
     const { id: _id, created_at, updated_at, created_by, ...rest } = form;
     const patch = { ...rest, published_at: form.status === "published" && !form.published_at ? new Date().toISOString() : form.published_at };
     const { error } = await supabase.from("books").update(patch).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("update", "book", id, `status=${form.status}`);
     toast.success("Book saved");
     qc.invalidateQueries({ queryKey: ["book", id] });
@@ -70,13 +70,13 @@ function BookPage() {
     const { error } = on
       ? await supabase.from("book_authors").insert({ book_id: id, author_id: aid })
       : await supabase.from("book_authors").delete().eq("book_id", id).eq("author_id", aid);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["book", id] });
   }
 
   async function del() {
     const { error } = await supabase.from("books").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("delete", "book", id, form?.title);
     toast.success("Book deleted");
     navigate({ to: "/books" });
@@ -199,7 +199,7 @@ function ChapterDialog({ bookId, chapter, editable, onClose }: { bookId: string;
       published_at: c.status === "published" && !c.published_at ? new Date().toISOString() : c.published_at ?? null,
     };
     const { error } = c.id ? await supabase.from("chapters").update(payload).eq("id", c.id) : await supabase.from("chapters").insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction(c.id ? "update" : "create", "chapter", c.id, c.title);
     toast.success("Chapter saved");
     qc.invalidateQueries({ queryKey: ["book", bookId] });
@@ -208,7 +208,7 @@ function ChapterDialog({ bookId, chapter, editable, onClose }: { bookId: string;
   async function remove() {
     if (!c.id) return;
     const { error } = await supabase.from("chapters").delete().eq("id", c.id);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     await logAction("delete", "chapter", c.id, c.title);
     qc.invalidateQueries({ queryKey: ["book", bookId] });
     onClose();
@@ -222,7 +222,7 @@ function ChapterDialog({ bookId, chapter, editable, onClose }: { bookId: string;
           <div className="sm:col-span-3"><Field label="Title"><Input disabled={!editable} value={c.title} onChange={(e) => setC({ ...c, title: e.target.value })} /></Field></div>
           <div className="sm:col-span-4"><Field label={`Content (${countWords(c.content ?? "")} words)`}><Textarea rows={14} className="font-serif" disabled={!editable} value={c.content} onChange={(e) => setC({ ...c, content: e.target.value })} /></Field></div>
           <Field label="Status">
-            <Select disabled={!editable} value={c.status} onValueChange={(v) => setC({ ...c, status: v as Chapter["status"] })}>
+            <Select disabled={!editable} value={c.status ?? "draft"} onValueChange={(v) => setC({ ...c, status: v as Chapter["status"] })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{CH_STATUSES.map((s) => <SelectItem key={s} value={s}>{s.replace("_", " ")}</SelectItem>)}</SelectContent>
             </Select>
