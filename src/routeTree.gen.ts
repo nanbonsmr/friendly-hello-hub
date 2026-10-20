@@ -16,6 +16,7 @@ import { Route as AuthenticatedAuditRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAuthorsRouteImport } from './routes/_authenticated/authors'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedGenresRouteImport } from './routes/_authenticated/genres'
+import { Route as AuthenticatedStaffRouteImport } from './routes/_authenticated/staff'
 import { Route as AuthenticatedBooksIndexRouteImport } from './routes/_authenticated/books.index'
 import { Route as AuthenticatedBooksIdRouteImport } from './routes/_authenticated/books.$id'
 import { Route as AuthenticatedBooksIdChaptersChapterIdRouteImport } from './routes/_authenticated/books.$id_.chapters.$chapterId'
@@ -54,6 +55,11 @@ const AuthenticatedGenresRoute = AuthenticatedGenresRouteImport.update({
   path: '/genres',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStaffRoute = AuthenticatedStaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedBooksIndexRoute = AuthenticatedBooksIndexRouteImport.update({
   id: '/books/',
   path: '/books/',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/authors': typeof AuthenticatedAuthorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
+  '/staff': typeof AuthenticatedStaffRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books/': typeof AuthenticatedBooksIndexRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByTo {
   '/authors': typeof AuthenticatedAuthorsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/genres': typeof AuthenticatedGenresRoute
+  '/staff': typeof AuthenticatedStaffRoute
   '/books/$id': typeof AuthenticatedBooksIdRoute
   '/books': typeof AuthenticatedBooksIndexRoute
   '/books/$id/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
@@ -102,6 +110,7 @@ export interface FileRoutesById {
   '/_authenticated/authors': typeof AuthenticatedAuthorsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/genres': typeof AuthenticatedGenresRoute
+  '/_authenticated/staff': typeof AuthenticatedStaffRoute
   '/_authenticated/books/$id': typeof AuthenticatedBooksIdRoute
   '/_authenticated/books/': typeof AuthenticatedBooksIndexRoute
   '/_authenticated/books/$id_/chapters/$chapterId': typeof AuthenticatedBooksIdChaptersChapterIdRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/authors'
     | '/dashboard'
     | '/genres'
+    | '/staff'
     | '/books/$id'
     | '/books/'
     | '/books/$id/chapters/$chapterId'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/authors'
     | '/dashboard'
     | '/genres'
+    | '/staff'
     | '/books/$id'
     | '/books'
     | '/books/$id/chapters/$chapterId'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/_authenticated/authors'
     | '/_authenticated/dashboard'
     | '/_authenticated/genres'
+    | '/_authenticated/staff'
     | '/_authenticated/books/$id'
     | '/_authenticated/books/'
     | '/_authenticated/books/$id_/chapters/$chapterId'
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGenresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/staff': {
+      id: '/_authenticated/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof AuthenticatedStaffRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/books/': {
       id: '/_authenticated/books/'
       path: '/books'
@@ -229,6 +248,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAuthorsRoute: typeof AuthenticatedAuthorsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedGenresRoute: typeof AuthenticatedGenresRoute
+  AuthenticatedStaffRoute: typeof AuthenticatedStaffRoute
   AuthenticatedBooksIdRoute: typeof AuthenticatedBooksIdRoute
   AuthenticatedBooksIndexRoute: typeof AuthenticatedBooksIndexRoute
   AuthenticatedBooksIdChaptersChapterIdRoute: typeof AuthenticatedBooksIdChaptersChapterIdRoute
@@ -239,6 +259,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAuthorsRoute: AuthenticatedAuthorsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedGenresRoute: AuthenticatedGenresRoute,
+  AuthenticatedStaffRoute: AuthenticatedStaffRoute,
   AuthenticatedBooksIdRoute: AuthenticatedBooksIdRoute,
   AuthenticatedBooksIndexRoute: AuthenticatedBooksIndexRoute,
   AuthenticatedBooksIdChaptersChapterIdRoute:

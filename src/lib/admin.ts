@@ -33,3 +33,18 @@ export async function logAction(action: string, entity_type: string, entity_id?:
   if (!data.user) return;
   await supabase.from("audit_logs").insert({ actor_id: data.user.id, action, entity_type, entity_id: entity_id ?? null, details: details ?? null });
 }
+
+export const ROLES = ["super_admin", "admin", "content_manager", "editor", "moderator", "finance_manager", "analyst", "author"] as const;
+export const canModerate = (roles: string[]) => roles.some((r) => ["super_admin", "admin", "moderator"].includes(r));
+export const canFinance = (roles: string[]) => roles.some((r) => ["super_admin", "admin", "finance_manager"].includes(r));
+
+/** Scheduled content counts as live once its time has passed. */
+export function effectiveStatus(status: string, scheduledAt: string | null) {
+  return status === "scheduled" && scheduledAt && new Date(scheduledAt) <= new Date() ? "published" : status;
+}
+
+export function toLocalInput(iso: string | null | undefined) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
