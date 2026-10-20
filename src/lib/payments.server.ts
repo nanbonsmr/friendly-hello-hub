@@ -136,7 +136,7 @@ export async function verifyPurchase(userId: string, item: PurchaseItem, receipt
   const v = await callLinksEt(receiptUrl);
   if (!v.ok) return reject(v.reason);
   const r = normaliseReceipt(v.receipt);
-  const extra = { provider: r.source.split("-")[0], receipt_source: r.source, receipt_reference: r.reference, payer_name: r.payer, receiver_name: r.receiver, paid_cents: r.amount != null ? Math.round(r.amount * 100) : null };
+  const extra = { provider: r.source.split("-")[0] ?? r.source, receipt_source: r.source, receipt_reference: r.reference, payer_name: r.payer, receiver_name: r.receiver, paid_cents: r.amount != null ? Math.round(r.amount * 100) : null };
 
   // 4. Check it.
   if (!r.reference) return reject("The receipt has no transaction reference.", extra);
