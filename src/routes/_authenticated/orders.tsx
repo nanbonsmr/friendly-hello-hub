@@ -26,6 +26,7 @@ function OrdersPage() {
   const { data: roles = [] } = useQuery(myRolesQuery);
   const can = canFinance(roles);
   const [status, setStatus] = useState("all");
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
   const { data } = useQuery({
     queryKey: ["orders", status],
     queryFn: async () => {
@@ -33,11 +34,26 @@ function OrdersPage() {
       if (status !== "all") q = q.eq("status", status);
       const [o, p] = await Promise.all([q, supabase.from("profiles").select("id,email")]);
       const emails = new Map((p.data ?? []).map((x) => [x.id, x.email]));
-      return (o.data ?? []).map((x) => ({ ...x, email: emails.get(x.user_id) ?? "Reader" }));
+      const proofPaths = (o.data ?? []).flatMap((x) => x.receipt_path ? [x.receipt_path] : []);
+      const { data: signedProofs } = proofPaths.length ? await supabase.storage.from("payment-receipts").createSignedUrls(proofPaths, 600) : { data: [] };
+      const proofUrls = new Map((signedProofs ?? []).flatMap((proof) => proof.path && proof.signedUrl ? [[proof.path, proof.signedUrl] as const] : []));
+      return (o.data ?? []).map((x) => ({ ...x, email: emails.get(x.user_id) ?? "Reader", proofUrl: x.receipt_path ? proofUrls.get(x.receipt_path) ?? null : null }));
     },
   });
   const paid = (data ?? []).filter((o) => o.status === "paid");
   const revenue = paid.reduce((s, o) => s + o.amount_cents, 0);
+
+  async function reviewProof(id: string, approved: boolean) {
+    const reason = approved ? null : prompt("Why could this payment not be confirmed?");
+    if (!approved && reason === null) return;
+    setReviewingId(id);
+    const { error } = await supabase.rpc("review_uploaded_payment", { p_order_id: id, p_approved: approved, p_reason: reason });
+    setReviewingId(null);
+    if (error) { toast.error(error.message); return; }
+    await logAction(approved ? "approve_uploaded_payment" : "reject_uploaded_payment", "order", id, reason ?? undefined);
+    toast.success(approved ? "Payment confirmed and access granted." : "Payment proof rejected.");
+    qc.invalidateQueries({ queryKey: ["orders"] });
+  }
 
   async function refund(id: string) {
     const reason = prompt("Refund reason (the reader loses access to this item)");
@@ -52,7 +68,7 @@ function OrdersPage() {
 
   return (
     <>
-      <PageHeader title="Orders & payments" description="Readers pay by bank or telebirr; each receipt is confirmed with the bank before access is granted." />
+      <PageHeader title="Orders & payments" description="Receipt links are checked with the provider. Uploaded receipt photos wait here for finance review." />
       <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
         <Kpi label="Revenue (shown)" value={formatPrice(revenue, "ETB")} />
         <Kpi label="Paid orders" value={String(paid.length)} />
@@ -77,13 +93,13 @@ function OrdersPage() {
                 <TableCell className="text-sm">{o.email}{o.payer_name && <p className="text-xs text-muted-foreground">Payer: {o.payer_name}</p>}</TableCell>
                 <TableCell className="max-w-56 truncate text-sm" title={o.item_title}>{o.item_title}</TableCell>
                 <TableCell className="text-sm">{formatPrice(o.amount_cents, o.currency)}{o.paid_cents != null && <p className="text-xs text-muted-foreground">paid {formatPrice(o.paid_cents, o.currency)}</p>}</TableCell>
-                <TableCell className="text-xs">{o.receipt_source ?? "—"}<p className="font-mono">{o.receipt_reference}</p>{o.receiver_name && <p className="text-muted-foreground">to {o.receiver_name}</p>}</TableCell>
+                <TableCell className="text-xs">{o.receipt_source ?? "—"}<p className="font-mono">{o.receipt_reference}</p>{o.receiver_name && <p className="text-muted-foreground">to {o.receiver_name}</p>}{o.proofUrl && <a className="mt-1 inline-block text-primary underline" href={o.proofUrl} target="_blank" rel="noreferrer">View uploaded proof</a>}</TableCell>
                 <TableCell>
                   <span className={cn("rounded-md px-2 py-0.5 text-xs font-medium", tone[o.status])}>{o.status}</span>
                   {o.rejection_reason && <p className="mt-1 max-w-48 text-xs text-muted-foreground">{o.rejection_reason}</p>}
                   {o.refund_reason && <p className="mt-1 max-w-48 text-xs text-muted-foreground">{o.refund_reason}</p>}
                 </TableCell>
-                <TableCell>{can && o.status === "paid" && <Button size="sm" variant="outline" onClick={() => refund(o.id)}>Refund</Button>}</TableCell>
+                <TableCell><div className="flex flex-wrap gap-2">{can && o.status === "pending" && o.receipt_path && <><Button size="sm" disabled={reviewingId === o.id} onClick={() => void reviewProof(o.id, true)}>{reviewingId === o.id ? "Saving…" : "Approve"}</Button><Button size="sm" variant="outline" disabled={reviewingId === o.id} onClick={() => void reviewProof(o.id, false)}>Reject</Button></>}{can && o.status === "paid" && <Button size="sm" variant="outline" onClick={() => refund(o.id)}>Refund</Button>}</div></TableCell>
               </TableRow>
             ))}
           </TableBody>

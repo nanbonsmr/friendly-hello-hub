@@ -92,6 +92,9 @@ async function hash(s: string) {
 
 /** Verify a receipt for a reader's purchase; creates an order and, if valid, an entitlement. */
 export async function verifyPurchase(userId: string, item: PurchaseItem, receiptUrl: string): Promise<VerifyResult> {
+  if (!process.env["LINKS_ET_API_KEY"]) {
+    return { ok: false, reason: "Automatic receipt verification is not set up yet. Please submit a receipt photo or contact Hawi support." };
+  }
   const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
 
   // 1. Work out the price on the server.
@@ -147,9 +150,20 @@ export async function verifyPurchase(userId: string, item: PurchaseItem, receipt
   if (!receiverMatches(r.receiver, allowed)) return reject("This payment was not sent to our account.", extra);
   if (r.amount == null || Math.round(r.amount * 100) < priceCents) return reject(`Amount paid is less than the price (${(priceCents / 100).toFixed(2)} ETB).`, extra);
 
-  // 5. Mark paid (unique index blocks a receipt being reused) and grant access.
-  const { error: pErr } = await db.from("orders").update({ status: "paid", verified_at: new Date().toISOString(), ...extra }).eq("id", order.id);
-  if (pErr) return reject(pErr.code === "23505" ? "This receipt has already been used." : "Could not record the payment.", { ...extra, receipt_reference: null });
-  await db.from("entitlements").insert({ user_id: userId, book_id: bookId, chapter_id: chapterId, order_id: order.id });
+  // 5. Mark paid and grant access atomically. A failed entitlement insert must
+  // never leave a paid order that still cannot be read.
+  const { error: completeError } = await db.rpc("complete_verified_payment", {
+    p_order_id: order.id,
+    p_provider: extra.provider,
+    p_receipt_source: extra.receipt_source,
+    p_receipt_reference: extra.receipt_reference!,
+    p_payer_name: extra.payer_name,
+    p_receiver_name: extra.receiver_name,
+    p_paid_cents: extra.paid_cents!,
+  });
+  if (completeError) {
+    const duplicate = completeError.code === "23505";
+    return reject(duplicate ? "This receipt has already been used." : "Could not record the payment and unlock this title.", { ...extra, receipt_reference: duplicate ? null : extra.receipt_reference });
+  }
   return { ok: true, orderId: order.id, itemTitle: title, paid: r.amount, currency };
 }

@@ -482,6 +482,7 @@ export type Database = {
           paid_cents: number | null
           payer_name: string | null
           provider: string | null
+          receipt_path: string | null
           receipt_reference: string | null
           receipt_source: string | null
           receiver_name: string | null
@@ -504,6 +505,7 @@ export type Database = {
           paid_cents?: number | null
           payer_name?: string | null
           provider?: string | null
+          receipt_path?: string | null
           receipt_reference?: string | null
           receipt_source?: string | null
           receiver_name?: string | null
@@ -526,6 +528,7 @@ export type Database = {
           paid_cents?: number | null
           payer_name?: string | null
           provider?: string | null
+          receipt_path?: string | null
           receipt_reference?: string | null
           receipt_source?: string | null
           receiver_name?: string | null
@@ -565,6 +568,9 @@ export type Database = {
         Row: {
           default_chapter_price_cents: number
           default_currency: string
+          bank_account_holder: string | null
+          bank_account_number: string | null
+          bank_name: string | null
           free_preview_chapters: number
           id: number
           maintenance_mode: boolean
@@ -574,11 +580,15 @@ export type Database = {
           require_review_approval: boolean
           reviews_enabled: boolean
           support_email: string | null
+          telebirr_phone_number: string | null
           updated_at: string
         }
         Insert: {
           default_chapter_price_cents?: number
           default_currency?: string
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
           free_preview_chapters?: number
           id?: number
           maintenance_mode?: boolean
@@ -588,11 +598,15 @@ export type Database = {
           require_review_approval?: boolean
           reviews_enabled?: boolean
           support_email?: string | null
+          telebirr_phone_number?: string | null
           updated_at?: string
         }
         Update: {
           default_chapter_price_cents?: number
           default_currency?: string
+          bank_account_holder?: string | null
+          bank_account_number?: string | null
+          bank_name?: string | null
           free_preview_chapters?: number
           id?: number
           maintenance_mode?: boolean
@@ -602,6 +616,7 @@ export type Database = {
           require_review_approval?: boolean
           reviews_enabled?: boolean
           support_email?: string | null
+          telebirr_phone_number?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1080,6 +1095,18 @@ export type Database = {
       }
     }
     Functions: {
+      complete_verified_payment: {
+        Args: {
+          p_order_id: string
+          p_provider: string
+          p_receipt_source: string
+          p_receipt_reference: string
+          p_payer_name: string | null
+          p_receiver_name: string | null
+          p_paid_cents: number
+        }
+        Returns: undefined
+      }
       can_edit_content: { Args: { _user_id: string }; Returns: boolean }
       can_manage_finance: { Args: { _user_id: string }; Returns: boolean }
       can_moderate: { Args: { _user_id: string }; Returns: boolean }
@@ -1096,6 +1123,14 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      submit_uploaded_payment: {
+        Args: { p_book_id: string | null; p_chapter_id: string | null; p_receipt_path: string }
+        Returns: string
+      }
+      review_uploaded_payment: {
+        Args: { p_approved: boolean; p_order_id: string; p_reason?: string | null }
+        Returns: undefined
+      }
     }
     Enums: {
       access_type: "free" | "paid" | "subscription" | "per_chapter"
